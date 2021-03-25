@@ -5,8 +5,12 @@
         <v-card-title>Login</v-card-title>
         <v-form>
           <v-container class="pa-4">
-            <v-text-field label="Username" filled></v-text-field>
-            <v-text-field label="Password" filled></v-text-field>
+            <v-text-field label="Email" type="email" filled></v-text-field>
+            <v-text-field
+              label="Password"
+              type="password"
+              filled
+            ></v-text-field>
           </v-container>
         </v-form>
         <v-card-actions>

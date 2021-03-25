@@ -4,6 +4,7 @@ import VueRouter from 'vue-router';
 import Login from '@/views/authentication/Login.vue';
 import Explore from '@/views/Explore.vue';
 import Editor from '@/views/Editor.vue';
+import Authentication from '@/views/Authentication.vue';
 
 import Home from '../views/Home.vue';
 
@@ -37,6 +38,11 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login,
+  },
+  {
+    path: '/authentication',
+    name: 'Authentication',
+    component: Authentication,
   },
 ];
 
