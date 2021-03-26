@@ -1,13 +1,22 @@
 <template>
   <v-app>
     <v-app-bar class="primary" dark app>
-      <v-toolbar-title class="accent--text font-weight-bold">
-        Kata
-      </v-toolbar-title>
+      <router-link to="/" exact>
+        <v-toolbar-title class="accent--text font-weight-bold">
+          Kata
+        </v-toolbar-title>
+      </router-link>
       <v-spacer></v-spacer>
-      <router-link to="/explore">Explore</router-link>
-      <router-link to="/editor">Editor</router-link>
-      <router-link to="/login">Login</router-link>
+      <v-btn
+        v-for="route in routes"
+        :key="route.path"
+        :to="route.path"
+        class="primary text-button"
+        exact
+        plain
+      >
+        {{ route.name }}
+      </v-btn>
     </v-app-bar>
 
     <v-main>
@@ -24,6 +33,11 @@ export default {
       .addEventListener('change', (e) => {
         this.$vuetify.theme.dark = e.matches;
       });
+  },
+  computed: {
+    routes() {
+      return this.$router.options.routes.filter((r) => r.path !== '/');
+    },
   },
 };
 </script>

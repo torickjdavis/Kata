@@ -2,7 +2,7 @@
   <v-container>
     <v-row justify="end">
       <v-col>
-        <v-text class="text-h2"> Explore </v-text>
+        <span class="text-h2">Explore</span>
       </v-col>
       <v-col cols="4">
         <v-text-field
