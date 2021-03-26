@@ -4,7 +4,7 @@ import status from 'http-status';
 import mongoose from 'mongoose';
 
 // Create
-const create = ({ model }) => async (req, res, next) => {
+export const create = ({ model }) => async (req, res, next) => {
   // use body and let schema validation handle keys
   try {
     const instance = new model(req.body);
@@ -16,13 +16,15 @@ const create = ({ model }) => async (req, res, next) => {
 };
 
 // Read
-const read = ({ model, name }) => async (req, res, next) => {
+export const read = ({ model, name }) => async (req, res, next) => {
   try {
     const id = req.params.id;
     const instance = await model.findById(id).exec();
     if (instance) res.json(instance);
     else {
-      res.status(status.NOT_FOUND).json({ message: `No ${name} Found (${id})` });
+      res
+        .status(status.NOT_FOUND)
+        .json({ message: `No ${name} Found (${id})` });
     }
   } catch (error) {
     if (error instanceof mongoose.Error.CastError) {
@@ -35,7 +37,7 @@ const read = ({ model, name }) => async (req, res, next) => {
 };
 
 // Update
-const replace = ({ model, name }) => async (req, res, next) => {
+export const replace = ({ model, name }) => async (req, res, next) => {
   try {
     const id = req.params.id;
     await model.findOneAndReplace({ _id: id }, req.body).exec();
@@ -53,7 +55,7 @@ const replace = ({ model, name }) => async (req, res, next) => {
   }
 };
 
-const modify = ({ model, name }) => async (req, res, next) => {
+export const modify = ({ model, name }) => async (req, res, next) => {
   try {
     const id = req.params.id;
     await model.findByIdAndUpdate(id, req.body).exec();
@@ -72,7 +74,7 @@ const modify = ({ model, name }) => async (req, res, next) => {
 };
 
 // Delete (Remove)
-const remove = ({ model, name }) => async (req, res, next) => {
+export const remove = ({ model, name }) => async (req, res, next) => {
   try {
     const id = req.params.id;
     await model.findByIdAndDelete(id).exec();
@@ -91,7 +93,7 @@ const remove = ({ model, name }) => async (req, res, next) => {
 };
 
 // List (Paginated)
-const list = ({ model, collection }) => async (req, res, next) => {
+export const list = ({ model, collection }) => async (req, res, next) => {
   try {
     let { limit = 10, page = 1, all = false } = req.query;
     limit = parseInt(limit);
@@ -99,11 +101,15 @@ const list = ({ model, collection }) => async (req, res, next) => {
     all = all !== undefined && all !== 'false';
 
     if (isNaN(limit) || limit !== Number(limit)) {
-      return res.status(status.BAD_REQUEST).json({ message: 'Limit must be an Integer.' });
+      return res
+        .status(status.BAD_REQUEST)
+        .json({ message: 'Limit must be an Integer.' });
     }
 
     if (isNaN(page) || page !== Number(page)) {
-      return res.status(status.BAD_REQUEST).json({ message: 'Page must be an Integer.' });
+      return res
+        .status(status.BAD_REQUEST)
+        .json({ message: 'Page must be an Integer.' });
     }
 
     let instances = null;
@@ -142,7 +148,12 @@ export function resource(model) {
   const { name } = wrapped;
 
   router.post(`/${name}`, create(wrapped));
-  router.route(`/${name}/:id`).get(read(wrapped)).put(replace(wrapped)).patch(modify(wrapped)).delete(remove(wrapped));
+  router
+    .route(`/${name}/:id`)
+    .get(read(wrapped))
+    .put(replace(wrapped))
+    .patch(modify(wrapped))
+    .delete(remove(wrapped));
   router.get(`/${name}`, list(wrapped));
 
   return router;
