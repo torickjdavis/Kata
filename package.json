@@ -1,10 +1,18 @@
 {
   "name": "kata-root",
   "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
   "scripts": {
+    "start": "concurrently \"npm run client:build\" \"npm run server:start\"",
+    "dev": "concurrently \"npm run client:dev\" \"npm run server:dev\"",
+    "client:dev": "cd client && npm run serve",
+    "client:build": "cd client && npm run build",
+    "server:start": "cd server && npm run start",
+    "server:dev": "cd server && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MIT"
+  "dependencies": {
+    "concurrently": "^6.0.0"
+  }
 }
