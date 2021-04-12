@@ -1,0 +1,66 @@
+@host = localhost
+@port = 5000
+@origin = {{host}}:{{port}}
+
+### List
+GET http://{{origin}}/api/kata/
+
+### Create
+
+POST http://{{origin}}/api/kata
+Content-Type: application/json
+
+{
+  "title": "Demo Create",
+  "creator": "",
+  "version": "0.1.0",
+  "runScript": "node test.js",
+  "files": [
+      {
+        "name": "test.js",
+        "contents": "expect(true).toBe(true);"
+      }
+  ]
+}
+
+### Create - User
+# @name createUser
+POST http://{{origin}}/api/user
+Content-Type: application/json
+
+{
+  "email": "demo@example.com",
+  "name": {
+    "first": "Demo",
+    "last": "User"
+  },
+  "password": "demo-user"
+}
+
+### Create Response Variable
+
+@userId = {{createUser.response.body._id}}
+
+### Read - User
+GET http://{{origin}}/api/user/{{userId}}
+
+### Update - User
+
+PATCH http://{{origin}}/api/user/{{userId}}
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "name": "john Doe",
+  "password": "john.doe!42"
+}
+
+### Delete - User
+
+DELETE http://{{origin}}/api/user/{{userId}}
+
+### List - User
+GET http://{{origin}}/api/user
+
+### List - Kata (case-insensitive)
+GET http://{{origin}}/api/Kata

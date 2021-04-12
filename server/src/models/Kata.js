@@ -12,6 +12,10 @@ export default mongoose.model(
       ref: 'user',
       required: true,
     },
+    date: {
+      type: Date,
+      default: Date.now,
+    },
     version: String,
     runScript: String,
     files: [
