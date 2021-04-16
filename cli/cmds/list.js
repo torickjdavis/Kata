@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const api = require('../api');
 
 module.exports.command = ['list <resource>', 'ls'];
@@ -6,11 +7,27 @@ module.exports.describe = 'list resource';
 
 const PAGE_DEFAULT = 1;
 const LIMIT_DEFAULT = 10;
+const MIN_ID_LENGTH = 6;
 
 module.exports.builder = (yargs) => {
   yargs
     .positional('resource', {
       choices: ['kata', 'workshop'],
+    })
+    .option('id-show', {
+      alias: 'i',
+      type: 'boolean',
+      describe: 'output the resource ID',
+    })
+    .option('id-length', {
+      type: 'number',
+      describe: `limit the resource ID length (default and min ${MIN_ID_LENGTH})`,
+      coerce(arg) {
+        if (arg === undefined || arg === null) return MIN_ID_LENGTH;
+        if (MIN_ID_LENGTH <= arg) return arg;
+        throw new Error('Minimum Length of 6');
+      },
+      implies: 'id-show',
     })
     .option('page', {
       alias: 'p',
@@ -36,22 +53,31 @@ async function creatorName(userId) {
   return `${name.first} ${name.last}`;
 }
 
-async function displayKata({ title, creator, date }) {
+function idFormat({ show, length = MIN_ID_LENGTH }) {
+  return (id) => (show ? id.substring(0, length) : '');
+}
+
+async function displayKata({ title, creator, date, _id }, idConfig) {
   const fullName = await creatorName(creator);
+  const id = idFormat(idConfig)(_id);
   console.log(
-    title,
-    `(${fullName})`,
+    `${id ? `${chalk.yellow(id)} ` : ''}${chalk.cyan(title)}`,
+    chalk.grey(`(${fullName})`),
     `[${new Date(date).toLocaleDateString()}]`
   );
 }
 
-async function displayWorkshop({ title, creator, katas }) {
+async function displayWorkshop({ title, creator, katas, _id }, idConfig) {
   const fullName = await creatorName(creator);
-  console.group(title, `(${fullName})`);
+  const id = idFormat(idConfig)(_id);
+  console.group(
+    `${id ? `${chalk.yellow(id)} ` : ''}${chalk.green(title)}`,
+    chalk.grey(`(${fullName})`)
+  );
   for (const kataId of katas) {
     const response = await api.get(`/kata/${kataId}`);
     const kata = response.data;
-    displayKata(kata);
+    await displayKata(kata, idConfig);
   }
   console.groupEnd();
 }
@@ -59,6 +85,8 @@ async function displayWorkshop({ title, creator, katas }) {
 module.exports.handler = async (argv) => {
   const {
     resource,
+    idShow,
+    idLength,
     all = false,
     page = PAGE_DEFAULT,
     limit = LIMIT_DEFAULT,
@@ -75,10 +103,14 @@ module.exports.handler = async (argv) => {
   console.group(`Page ${meta.page} of ${meta.pages}`, `(Total ${meta.total})`);
   if (resource === 'kata') {
     // display katas
-    for (const kata of results) displayKata(kata);
-  } else {
+    for (const kata of results) {
+      await displayKata(kata, { show: idShow, length: idLength });
+    }
+  } else if (resource === 'workshop') {
     // display workshops
-    for (const workshop of results) displayWorkshop(workshop);
-  }
+    for (const workshop of results) {
+      await displayWorkshop(workshop, { show: idShow, length: idLength });
+    }
+  } else console.log('Unexpected Resource Type', resource);
   console.groupEnd();
 };
