@@ -95,10 +95,11 @@ export const remove = ({ model, name }) => async (req, res, next) => {
 // List (Paginated)
 export const list = ({ model, collection }) => async (req, res, next) => {
   try {
-    let { limit = 10, page = 1, all = false } = req.query;
+    let { limit = 10, page = 1, all = false, populate = false } = req.query;
     limit = parseInt(limit);
     page = parseInt(page);
-    all = all !== undefined && all !== 'false';
+    all = queryToBoolean(all);
+    populate = queryToBoolean(populate);
 
     if (isNaN(limit) || limit !== Number(limit)) {
       return res
@@ -112,14 +113,17 @@ export const list = ({ model, collection }) => async (req, res, next) => {
         .json({ message: 'Page must be an Integer.' });
     }
 
-    let instances = null;
+    let query = model.find({});
     if (!all) {
-      instances = await model
-        .find({})
+      query = query
         .skip(limit * Math.max(page - 1, 0)) // no lower than the first page (0)
-        .limit(limit)
-        .exec();
-    } else instances = await model.find({}).exec();
+        .limit(limit);
+    }
+    if (populate) {
+      const refPaths = modelRefPaths(model);
+      for (const path of refPaths) query = query.populate(path);
+    }
+    const instances = await query.exec();
     const total = await model.countDocuments({}).exec();
     res.json({
       [collection]: instances,
@@ -136,11 +140,25 @@ export const list = ({ model, collection }) => async (req, res, next) => {
   }
 };
 
+// prettier-ignore
+const queryToBoolean = (query) => typeof query === 'boolean' ? query : query !== 'false';
+
 const wrappedModel = (model) => ({
   model,
   name: model.modelName,
   collection: model.collection.name,
 });
+
+const modelRefPaths = (model) => {
+  const refPaths = [];
+  for (const [name, path] of [
+    ...Object.entries(model.schema.paths),
+    ...Object.entries(model.schema.subpaths),
+  ]) {
+    if (path.options.ref) refPaths.push(name.replace('.$', '')); // make arrays into key
+  }
+  return refPaths;
+};
 
 export function resource(model) {
   const router = new Router();
