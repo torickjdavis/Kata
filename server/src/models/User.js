@@ -1,6 +1,4 @@
 import mongoose from 'mongoose';
-
-import Kata from './Kata.js';
 import bcrypt from 'bcrypt';
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -18,13 +16,14 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+    select: false,
   },
   submissions: [
     new mongoose.Schema(
       {
         kata: {
           type: ObjectId,
-          ref: Kata,
+          ref: 'kata',
           required: true,
         },
         kataVersion: String,
