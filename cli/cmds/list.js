@@ -47,37 +47,29 @@ module.exports.builder = (yargs) => {
     });
 };
 
-async function creatorName(userId) {
-  const response = await api.get(`/user/${userId}`);
-  const { name } = response.data;
-  return `${name.first} ${name.last}`;
-}
-
 function idFormat({ show, length = MIN_ID_LENGTH }) {
   return (id) => (show ? id.substring(0, length) : '');
 }
 
-async function displayKata({ title, creator, date, _id }, idConfig) {
-  const fullName = await creatorName(creator);
+async function displayKata({ _id, title, creator, date }, idConfig) {
   const id = idFormat(idConfig)(_id);
   console.log(
     `${id ? `${chalk.yellow(id)} ` : ''}${chalk.cyan(title)}`,
-    chalk.grey(`(${fullName})`),
-    `[${new Date(date).toLocaleDateString()}]`
+    `(${creator.name.full})`,
+    chalk.grey(`[${new Date(date).toLocaleDateString()}]`)
   );
 }
 
-async function displayWorkshop({ title, creator, katas, _id }, idConfig) {
-  const fullName = await creatorName(creator);
+async function displayWorkshop({ _id, title, creator, date, katas }, idConfig) {
   const id = idFormat(idConfig)(_id);
   console.group(
-    `${id ? `${chalk.yellow(id)} ` : ''}${chalk.green(title)}`,
-    chalk.grey(`(${fullName})`)
+    `${id ? `${chalk.dim.yellow(id)} ` : ''}${chalk.bold.green(title)}`,
+    `(${creator.name.full})`,
+    chalk.grey(`[${new Date(date).toLocaleDateString()}]`)
   );
-  for (const kataId of katas) {
-    const response = await api.get(`/kata/${kataId}`);
-    const kata = response.data;
-    await displayKata(kata, idConfig);
+  for (const kata of katas) {
+    const response = await api.get(`/kata/${kata._id}?populate`); // get detailed kata
+    await displayKata(response.data, idConfig);
   }
   console.groupEnd();
 }
@@ -93,7 +85,7 @@ module.exports.handler = async (argv) => {
   } = argv;
 
   // prettier-ignore
-  const response = await api.get(`/${resource}?page=${page}&limit=${limit}&all=${all}`);
+  const response = await api.get(`/${resource}?page=${page}&limit=${limit}&all=${all}&populate`);
 
   const results = response.data[`${resource}s`]; // only works on the plural of kata and workshop
   const meta = response.data.meta;
