@@ -57,6 +57,12 @@ const UserSchema = new mongoose.Schema({
 UserSchema.set('toObject', { virtuals: true });
 UserSchema.set('toJSON', { virtuals: true });
 
+UserSchema.virtual('name.full').get(function () {
+  return [this.name.first || null, this.name.last || null]
+    .filter((v) => !!v)
+    .join(' ');
+});
+
 UserSchema.pre('validate', async function () {
   if (this.password && this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 10);
