@@ -6,6 +6,7 @@ export default mongoose.model(
     title: {
       type: String,
       required: true,
+      index: true,
     },
     creator: {
       type: mongoose.Schema.Types.ObjectId,
@@ -17,12 +18,10 @@ export default mongoose.model(
       default: Date.now,
     },
     version: String,
-    runScript: String,
-    files: [
-      {
-        name: String,
-        contents: String,
-      },
-    ],
+    zip: {
+      type: Buffer,
+      select: false,
+      required: true,
+    },
   })
 );
