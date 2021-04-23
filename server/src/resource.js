@@ -169,19 +169,38 @@ const modelRefPaths = (model) => {
   return refPaths;
 };
 
-export function resource(model) {
+const next = (req, res, next) => next();
+
+const defaultPreMiddleWare = {
+  create: null,
+  read: null,
+  replace: null,
+  modify: null,
+  remove: null,
+  list: null,
+};
+
+export function resource(model, preMiddleware = defaultPreMiddleWare) {
   const router = new Router();
   const wrapped = wrappedModel(model);
   const { name } = wrapped;
 
-  router.post(`/${name}`, create(wrapped));
+  preMiddleware = { ...defaultPreMiddleWare, ...preMiddleware };
+
+  for (const key of Object.keys(preMiddleware)) {
+    if (!preMiddleware[key]) preMiddleware[key] = [next];
+    else if (!preMiddleware[key].length)
+      preMiddleware[key] = [preMiddleware[key]];
+  }
+
+  router.post(`/${name}`, ...preMiddleware.create, create(wrapped));
   router
     .route(`/${name}/:id`)
-    .get(read(wrapped))
-    .put(replace(wrapped))
-    .patch(modify(wrapped))
-    .delete(remove(wrapped));
-  router.get(`/${name}`, list(wrapped));
+    .get(...preMiddleware.read, read(wrapped))
+    .put(...preMiddleware.replace, replace(wrapped))
+    .patch(...preMiddleware.modify, modify(wrapped))
+    .delete(...preMiddleware.remove, remove(wrapped));
+  router.get(`/${name}`, ...preMiddleware.list, list(wrapped));
 
   return router;
 }
