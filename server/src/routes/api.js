@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import multer from 'multer';
 
 import { rootRoute } from '../controllers/api.js';
 import resource from '../resource.js';
@@ -14,9 +15,22 @@ const apiRouter = Router();
 
 // TODO disallow updating a user unless you are them, same goes for created resources
 
+const zipUpload = [
+  multer({
+    fileFilter: (req, file, cb) =>
+      cb(null, file.mimetype === 'application/zip'),
+  }).single('zip'),
+  (req, res, next) => {
+    req.body.zip = req.file?.buffer;
+    next();
+  },
+];
+
 apiRouter.get('/', rootRoute);
 apiRouter.use(resource(User));
-apiRouter.use(resource(Kata));
+apiRouter.use(
+  resource(Kata, { create: zipUpload, replace: zipUpload, modify: zipUpload })
+);
 apiRouter.use(resource(Workshop));
 apiRouter.post('/login', authenticate);
 apiRouter.get('/search/:resource', search);
