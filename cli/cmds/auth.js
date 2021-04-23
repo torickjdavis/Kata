@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const jwt = require('jsonwebtoken');
 const api = require('../api');
 const { info } = require('../stores');
 
@@ -36,7 +37,9 @@ async function login() {
   try {
     const answers = await inquirer.prompt(loginQuestions);
     const response = await api.post('/login', answers);
-    await info.store.set(info.keys.ACCESS_TOKEN, response.data.accessToken);
+    const { accessToken } = response.data;
+    await info.store.set(info.keys.ACCESS_TOKEN, accessToken);
+    await info.store.set(info.keys.DECODED_TOKEN, jwt.decode(accessToken));
     console.log('You are logged in.');
   } catch (error) {
     // prettier-ignore
