@@ -6,7 +6,9 @@ const { JWT_SECRET } = process.env;
 
 export async function authenticate(req, res, next) {
   try {
-    const user = await User.findOne({ email: req.body.email }).exec();
+    const user = await User.findOne({ email: req.body.email })
+      .select('+password')
+      .exec();
     if (!user) {
       return res.status(404).json({ message: `No ${User.modelName} Found` });
     }
@@ -17,7 +19,6 @@ export async function authenticate(req, res, next) {
     );
 
     if (!validPassword) return res.sendStatus(403);
-
     // TODO implement refresh tokens
     const accessToken = jwt.sign(user.toJSON(), JWT_SECRET, {
       expiresIn: '1d',
