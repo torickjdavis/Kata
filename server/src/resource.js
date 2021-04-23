@@ -19,7 +19,16 @@ export const create = ({ model }) => async (req, res, next) => {
 export const read = ({ model, name }) => async (req, res, next) => {
   try {
     const id = req.params.id;
-    const instance = await model.findById(id).exec();
+
+    let { populate = false } = req.query;
+    populate = queryToBoolean(populate);
+    let query = model.findById(id);
+    if (populate) {
+      const refPaths = modelRefPaths(model);
+      for (const path of refPaths) query = query.populate(path);
+    }
+
+    const instance = await query.exec();
     if (instance) res.json(instance);
     else {
       res
