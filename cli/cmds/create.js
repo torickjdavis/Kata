@@ -7,6 +7,7 @@ const chalk = require('chalk');
 const api = require('../api');
 const archive = require('../archive');
 const { info } = require('../stores');
+const { fileTimestamp } = require('../util');
 
 module.exports.command = ['create <resource>', 'init', 'make', 'mk'];
 
@@ -29,12 +30,6 @@ module.exports.handler = async (argv) => {
   if (resource === 'kata') return createKata(kataFolder);
   if (resource === 'workshop') return createWorkshop();
 };
-
-function fileTimestamp() {
-  const now = new Date();
-  now.setMilliseconds(0);
-  return now.toISOString().replace('.000Z', '').replace(/[T:]/g, '_');
-}
 
 async function createKata(kataFolder = '.') {
   const answers = await inquirer.prompt([
