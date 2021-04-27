@@ -16,19 +16,6 @@ export default async function search(req, res, next) {
       .json({ message: `Unsupported Resource ${resource}` });
   }
 
-  // TODO remove commented code
-  // couldn't get search to work
-  // const instances = await model
-  //   .search({
-  //     text: {
-  //       path: ['title', '_id'],
-  //       query: req.query.q,
-  //       fuzzy: {},
-  //     },
-  //   })
-  //   .project('title _id')
-  //   .exec();
-
   const { q } = req.query;
   try {
     const id = mongoose.Types.ObjectId(q);
