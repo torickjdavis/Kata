@@ -26,12 +26,48 @@ const zipUpload = [
   },
 ];
 
+const authConfig = {
+  verifier: (token) => User.verifyToken(token), // can't just pass User.verifyToken due to this binding
+  create: true,
+  modify: true,
+  replace: true,
+  delete: true,
+};
+
+const modelMadeBy = (model) => async (user, resourceId) => {
+  const instance = await model.findById(resourceId);
+  return user._id.toString() === instance.creator.toString(); // works due to common pattern across models
+};
+
 apiRouter.get('/', rootRoute);
-apiRouter.use(resource(User));
 apiRouter.use(
-  resource(Kata, { create: zipUpload, replace: zipUpload, modify: zipUpload })
+  resource(User, {
+    auth: {
+      ...authConfig,
+      create: false, // no need to authorize to create users
+      madeBy: async (authUser, resourceId) => {
+        return authUser._id.toString() === resourceId;
+      },
+    },
+  })
 );
-apiRouter.use(resource(Workshop));
+apiRouter.use(
+  resource(Kata, {
+    preMiddleware: { create: zipUpload, replace: zipUpload, modify: zipUpload },
+    auth: {
+      ...authConfig,
+      madeBy: modelMadeBy(Kata),
+    },
+  })
+);
+apiRouter.use(
+  resource(Workshop, {
+    auth: {
+      ...authConfig,
+      madeBy: modelMadeBy(Workshop),
+    },
+  })
+);
 apiRouter.post('/login', authenticate);
 apiRouter.get('/search/:resource', search);
 apiRouter.get('/userKatas/:id', getUserKatas);

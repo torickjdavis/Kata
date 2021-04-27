@@ -2,6 +2,7 @@ import { Router } from 'express';
 // import status from 'statuses';
 import status from 'http-status';
 import mongoose from 'mongoose';
+import { authorize, noOp } from './middleware.js';
 
 // Create
 export const create = ({ model }) => async (req, res, next) => {
@@ -169,8 +170,6 @@ const modelRefPaths = (model) => {
   return refPaths;
 };
 
-const next = (req, res, next) => next();
-
 const defaultPreMiddleWare = {
   create: null,
   read: null,
@@ -180,27 +179,77 @@ const defaultPreMiddleWare = {
   list: null,
 };
 
-export function resource(model, preMiddleware = defaultPreMiddleWare) {
+const defaultAuthConfig = {
+  create: false,
+  read: false,
+  update: false, // replace and modify
+  replace: false,
+  modify: false,
+  remove: false,
+  list: false,
+  verifier: null,
+  madeBy: null,
+};
+
+export function resource(
+  model,
+  options = { preMiddleware: defaultPreMiddleWare, auth: defaultAuthConfig }
+) {
   const router = new Router();
   const wrapped = wrappedModel(model);
   const { name } = wrapped;
 
-  preMiddleware = { ...defaultPreMiddleWare, ...preMiddleware };
+  const config = {
+    preMiddleware: {
+      ...defaultPreMiddleWare,
+      ...options.preMiddleware,
+    },
+    auth: {
+      ...defaultAuthConfig,
+      ...options.auth,
+    },
+  };
 
-  for (const key of Object.keys(preMiddleware)) {
-    if (!preMiddleware[key]) preMiddleware[key] = [next];
-    else if (!preMiddleware[key].length)
-      preMiddleware[key] = [preMiddleware[key]];
+  for (const key of Object.keys(config.preMiddleware)) {
+    if (!config.preMiddleware[key]) config.preMiddleware[key] = [noOp];
+    else if (!config.preMiddleware[key].length) {
+      config.preMiddleware[key] = [config.preMiddleware[key]];
+    }
   }
 
-  router.post(`/${name}`, ...preMiddleware.create, create(wrapped));
+  const auth = authorize(config.auth.verifier, config.auth.madeBy);
+  const createAuth = authorize(config.auth.verifier); // specific auth for create, skip madeBy check
+
+  router.post(
+    `/${name}`,
+    ...config.preMiddleware.create,
+    createAuth(config.auth.create),
+    create(wrapped)
+  );
   router
     .route(`/${name}/:id`)
-    .get(...preMiddleware.read, read(wrapped))
-    .put(...preMiddleware.replace, replace(wrapped))
-    .patch(...preMiddleware.modify, modify(wrapped))
-    .delete(...preMiddleware.remove, remove(wrapped));
-  router.get(`/${name}`, ...preMiddleware.list, list(wrapped));
+    .get(...config.preMiddleware.read, auth(config.auth.read), read(wrapped))
+    .put(
+      ...config.preMiddleware.replace,
+      auth(config.auth.update || config.auth.replace),
+      replace(wrapped)
+    )
+    .patch(
+      ...config.preMiddleware.modify,
+      auth(config.auth.update || config.auth.modify),
+      modify(wrapped)
+    )
+    .delete(
+      ...config.preMiddleware.remove,
+      auth(config.auth.remove),
+      remove(wrapped)
+    );
+  router.get(
+    `/${name}`,
+    ...config.preMiddleware.list,
+    auth(config.auth.list),
+    list(wrapped)
+  );
 
   return router;
 }
