@@ -7,7 +7,7 @@ const chalk = require('chalk');
 const api = require('../api');
 const archive = require('../archive');
 const { info } = require('../stores');
-const { fileTimestamp } = require('../util');
+const { fileTimestamp, findResourceIds } = require('../utils');
 
 module.exports.command = ['create <resource>', 'init', 'make', 'mk'];
 
@@ -56,7 +56,7 @@ async function createKata(kataFolder = '.') {
     await archive.zip(zipFile, answers.kataFolder, true);
 
     const accessToken = await info.store.get(info.keys.ACCESS_TOKEN);
-    const user = await info.store.get(info.keys.DECODED_TOKEN);
+    const user = await info.store.get(info.keys.USER);
 
     const formData = new FormData();
     formData.append('zip', fs.createReadStream(zipFile));
@@ -67,7 +67,7 @@ async function createKata(kataFolder = '.') {
     const res = await api.post('/kata', formData, {
       headers: {
         ...formData.getHeaders(),
-        Authentication: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
     console.log(
@@ -95,32 +95,19 @@ async function createWorkshop() {
     const { kata } = await inquirer.prompt({
       type: 'input',
       name: 'kata',
-      message: `Kata (id/title):`,
+      message: `Kata(s) (search/id/title):`,
       default: null,
     });
     if (!kata) break;
-    const res = await api.get(`/search/kata?q=${kata.trim()}`);
-    const queryKatas = res.data.katas;
-
-    if (!queryKatas.length)
-      console.log(`No Kata found by searching for "${kata}"`);
-    if (queryKatas.length === 1) katas.push(queryKatas[0]._id);
-    else {
-      const { selected } = await inquirer.prompt([
-        {
-          type: 'checkbox',
-          name: 'selected',
-          message: 'Select Kata(s) from Search Result:',
-          choices: queryKatas.map((k) => ({ name: k.title, value: k._id })),
-        },
-      ]);
-      katas.push(...selected);
-    }
+    const queryKatas = await findResourceIds('kata', kata.trim());
+    if (!queryKatas.length) {
+      console.log(`No Kata(s) found by searching for "${kata.trim()}"`);
+    } else katas.push(...queryKatas);
   }
 
   try {
     const accessToken = await info.store.get(info.keys.ACCESS_TOKEN);
-    const user = await info.store.get(info.keys.DECODED_TOKEN);
+    const user = await info.store.get(info.keys.USER);
 
     await api.post(
       '/workshop',
@@ -131,7 +118,7 @@ async function createWorkshop() {
       },
       {
         headers: {
-          Authentication: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
