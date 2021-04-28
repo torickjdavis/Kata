@@ -4,12 +4,12 @@
   "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "cleanup": "node cleanup.js",
-    "preuninstall": "node cleanup.js"
+    "start": "node src/index.js",
+    "cleanup": "node src/cleanup.js",
+    "preuninstall": "node src/cleanup.js"
   },
   "bin": {
-    "kata-cli": "./index.js"
+    "kata-cli": "./src/index.js"
   },
   "keywords": [],
   "author": "",
