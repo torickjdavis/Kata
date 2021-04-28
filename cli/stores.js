@@ -5,7 +5,7 @@ module.exports = {
     store: new Store('info'),
     keys: {
       ACCESS_TOKEN: 'accessToken',
-      DECODED_TOKEN: 'decodedToken',
+      USER: 'userInfo',
     },
   },
   kata: {
