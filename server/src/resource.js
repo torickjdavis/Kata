@@ -68,7 +68,12 @@ export const replace = ({ model, name }) => async (req, res, next) => {
 export const modify = ({ model, name }) => async (req, res, next) => {
   try {
     const id = req.params.id;
-    await model.findByIdAndUpdate(id, req.body).exec();
+    const document = await model.findById(id).exec();
+    for (const [key, value] of Object.entries(req.body)) {
+      document.set(key, value);
+    }
+    await document.save();
+
     res.json({
       success: true,
       message: `Modified ${name} Instance (${id})`,
