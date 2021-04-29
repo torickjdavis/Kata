@@ -36,7 +36,10 @@ export default async function search(req, res, next) {
     const instances = await model
       .find({
         title: {
-          $regex: q.split(/\b/).join('|'),
+          $regex: q
+            .split(/\s+/)
+            .map((w) => `(${w})`)
+            .join('|'),
           $options: 'i',
         },
       })
