@@ -45,8 +45,6 @@ async function deleteKata(search) {
     const getKataRes = await api.get(`/kata/${kataId}`);
     const kata = getKataRes.data;
 
-    console.log({ kata, user });
-
     if (kata.creator !== user._id) {
       return console.log(
         'You cannot update this resource, you did not create it.'
