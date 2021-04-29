@@ -59,7 +59,7 @@ async function updateKata(search, kataFolder = '.') {
 
     console.log('Updating', chalk.cyan(kata.title));
 
-    if (kata._id !== user._id) {
+    if (kata.creator !== user._id) {
       return console.log(
         'You cannot update this resource, you did not create it.'
       );
