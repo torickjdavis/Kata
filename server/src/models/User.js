@@ -72,11 +72,11 @@ UserSchema.pre('validate', async function () {
   }
 });
 
-UserSchema.statics.verifyPassword = async function (email, plainTextPassword) {
+UserSchema.static('verifyPassword', async function (email, plainTextPassword) {
   const user = await this.findOne({ email }).select('+password').exec();
   if (!user) throw new Error('Not Found');
   return await bcrypt.compare(plainTextPassword, user.password);
-};
+});
 
 UserSchema.methods.generateToken = async function () {
   return jwt.sign(this.toJSON(), JWT_SECRET, {
