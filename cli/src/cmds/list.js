@@ -55,7 +55,7 @@ async function displayKata({ _id, title, creator, date }, idConfig) {
   const id = idFormat(idConfig)(_id);
   console.log(
     `${id ? `${chalk.yellow(id)} ` : ''}${chalk.cyan(title)}`,
-    `(${creator.name.full})`,
+    `(${creator.name.full || creator.email})`,
     chalk.grey(`[${new Date(date).toLocaleDateString()}]`)
   );
 }
@@ -64,7 +64,7 @@ async function displayWorkshop({ _id, title, creator, date, katas }, idConfig) {
   const id = idFormat(idConfig)(_id);
   console.group(
     `${id ? `${chalk.dim.yellow(id)} ` : ''}${chalk.bold.green(title)}`,
-    `(${creator.name.full})`,
+    `(${creator.name.full || creator.email})`,
     chalk.grey(`[${new Date(date).toLocaleDateString()}]`)
   );
   for (const kata of katas) {
