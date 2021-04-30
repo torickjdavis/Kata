@@ -20,7 +20,17 @@ async function findResourceIds(resource, search, multiple = true) {
 
   if (!searchResults.length) return multiple ? [] : null;
   if (searchResults.length === 1) {
-    return multiple ? searchResults : searchResults[0]._id;
+    const found = searchResults[0];
+    const { confirm } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'confirm',
+        message: `Found one ${resourceName}, "${found.title}". Is that what you're looking for?`,
+        default: true,
+      },
+    ]);
+    if (confirm) return multiple ? [found._id] : found._id;
+    return multiple ? [] : null;
   }
 
   const { selected } = await inquirer.prompt([
