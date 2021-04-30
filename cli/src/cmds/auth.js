@@ -8,13 +8,14 @@ module.exports.describe = 'access the system';
 
 module.exports.builder = (yargs) => {
   yargs.positional('action', {
-    choices: ['login', 'register'],
+    choices: ['login', 'logout', 'register'],
   });
 };
 
 module.exports.handler = async (argv) => {
   const { action } = argv;
   if (action === 'login') return login();
+  if (action === 'logout') return logout();
   if (action === 'register') return register();
 };
 
@@ -62,6 +63,11 @@ const registerQuestions = [
   },
   ...loginQuestions,
 ];
+
+async function logout() {
+  await info.store.clear();
+  console.log('You are logged out.');
+}
 
 async function register() {
   try {
