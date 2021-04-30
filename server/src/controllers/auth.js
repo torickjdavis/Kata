@@ -1,4 +1,15 @@
+import status from 'http-status';
 import User from '../models/User.js';
+
+export async function verify(req, res, next) {
+  const validPassword = await User.verifyPassword(
+    req.body.email,
+    req.body.password
+  );
+
+  if (!validPassword) return res.sendStatus(status.FORBIDDEN);
+  return res.sendStatus(status.OK);
+}
 
 export async function authenticate(req, res, next) {
   try {

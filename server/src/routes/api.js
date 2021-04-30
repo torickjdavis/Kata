@@ -3,7 +3,7 @@ import multer from 'multer';
 
 import { rootRoute } from '../controllers/api.js';
 import resource from '../resource.js';
-import { authenticate } from '../controllers/auth.js';
+import { authenticate, verify } from '../controllers/auth.js';
 import { getUserKatas } from '../controllers/katas.js';
 import search from '../controllers/search.js';
 
@@ -69,6 +69,7 @@ apiRouter.use(
   })
 );
 apiRouter.post('/login', authenticate);
+apiRouter.post('/verify', verify);
 apiRouter.get('/search/:resource', search);
 apiRouter.get('/userKatas/:id', getUserKatas);
 
