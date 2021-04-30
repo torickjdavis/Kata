@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+import Kata from './Kata.js';
+import Workshop from './Workshop.js';
+
 const ObjectId = mongoose.Types.ObjectId;
 
 // TODO check versioning
@@ -96,5 +99,11 @@ UserSchema.static('verifyToken', async function (token) {
 
 UserSchema.set('toObject', { virtuals: true });
 UserSchema.set('toJSON', { virtuals: true });
+
+UserSchema.post('remove', async function () {
+  const userId = this._id;
+  await Workshop.deleteMany({ creator: userId }).exec();
+  await Kata.deleteMany({ creator: userId }).exec();
+});
 
 export default mongoose.model('user', UserSchema);
