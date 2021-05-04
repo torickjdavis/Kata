@@ -3,6 +3,7 @@ import { Router } from 'express';
 import status from 'http-status';
 import mongoose from 'mongoose';
 import { authorize, noOp } from './middleware.js';
+import { queryToBoolean, modelRefPaths } from './utils.js';
 
 // Create
 export const create = ({ model }) => async (req, res, next) => {
@@ -155,25 +156,11 @@ export const list = ({ model, collection }) => async (req, res, next) => {
   }
 };
 
-// prettier-ignore
-const queryToBoolean = (query) => typeof query === 'boolean' ? query : query !== 'false';
-
 const wrappedModel = (model) => ({
   model,
   name: model.modelName,
   collection: model.collection.name,
 });
-
-const modelRefPaths = (model) => {
-  const refPaths = [];
-  for (const [name, path] of [
-    ...Object.entries(model.schema.paths),
-    ...Object.entries(model.schema.subpaths),
-  ]) {
-    if (path.options.ref) refPaths.push(name.replace('.$', '')); // make arrays into key
-  }
-  return refPaths;
-};
 
 const defaultPreMiddleWare = {
   create: null,
