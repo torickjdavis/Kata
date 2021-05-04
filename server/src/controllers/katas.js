@@ -65,26 +65,52 @@ export async function listSubmissions(req, res, next) {
 
 export async function getSubmission(req, res, next) {
   try {
-    console.log(req.params);
     const { userId, submissionId } = req.params;
-    const user = await User.findById(userId).exec();
+    const user = await User.findById(userId)
+      .select('+submissions')
+      .populate('submissions.kata')
+      .exec();
 
     if (!user) {
       return res.status(status.NOT_FOUND).json({ message: 'No user found.' });
     }
 
-    const submission = user.submissions.find((s) => s._id === submissionId);
+    // prettier-ignore
+    let submission = user.submissions.find((s) => s._id.toString() === submissionId);
 
     if (!submission) {
       return res
         .status(status.NOT_FOUND)
         .json({ message: 'No submission found.' });
     }
-    console.log('req.user', req.user);
+
+    if (submission.public) return res.json(submission);
+
+    const authorization = req.headers['authorization'];
+
+    console.log(req.headers);
+
+    if (!authorization) {
+      return res
+        .status(status.UNAUTHORIZED)
+        .json({ message: 'Missing Authorization Header' });
+    }
+
+    const [, token] = authorization.match(/Bearer (.+)/); // Bearer TOKEN
+
+    if (!token) {
+      return res
+        .status(status.UNAUTHORIZED)
+        .json({ message: 'Missing Bearer Token' });
+    }
+
+    req.user = await User.verifyToken(token);
+
+    console.log(req.user);
+
     if (user._id.toString() === req.user._id.toString()) {
       return res.json(submission);
     }
-    if (submission.public) return res.json(submission);
     res.status(status.FORBIDDEN).json({
       // prettier-ignore
       message: 'This submission is not public and you are not authenticated as the submitter.',

@@ -87,11 +87,7 @@ apiRouter.post(
   authorize(authConfig.verifier)(true),
   createSubmission
 );
-apiRouter.get(
-  '/submission/:userId/:submissionId',
-  authorize(authConfig.verifier)(true),
-  getSubmission
-);
+apiRouter.get('/submission/:userId/:submissionId', getSubmission);
 apiRouter.get(
   '/submissions/:userId',
   authorize(authConfig.verifier)(true),
