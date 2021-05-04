@@ -10,10 +10,5 @@ module.exports = {
   },
   kata: {
     store: new Store('kata'),
-    keys: {},
-  },
-  workshop: {
-    store: new Store('workshop'),
-    keys: {},
   },
 };
