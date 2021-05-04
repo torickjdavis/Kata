@@ -2,9 +2,13 @@ import mongoose from 'mongoose';
 import status from 'http-status';
 import Kata from '../models/Kata.js';
 import Workshop from '../models/Workshop.js';
+import { queryToBoolean, modelRefPaths } from '../utils.js';
 
 export default async function search(req, res, next) {
   const resource = req.params.resource.toLowerCase();
+
+  let { populate = false } = req.query;
+  populate = queryToBoolean(populate);
 
   let model = null;
   if (resource === 'kata' || resource === 'katas') model = Kata;
@@ -19,7 +23,15 @@ export default async function search(req, res, next) {
   const { q } = req.query;
   try {
     const id = mongoose.Types.ObjectId(q);
-    const instance = await model.findById(id).exec();
+
+    let query = model.findById(id);
+
+    if (populate) {
+      const refPaths = modelRefPaths(model);
+      for (const path of refPaths) query = query.populate(path);
+    }
+
+    const instance = await query.exec();
     return res.json({ [model.collection.name]: [instance] });
   } catch (error) {
     // prettier-ignore
@@ -33,17 +45,22 @@ export default async function search(req, res, next) {
   }
 
   try {
-    const instances = await model
-      .find({
-        title: {
-          $regex: q
-            .split(/\s+/)
-            .map((w) => `(${w})`)
-            .join('|'),
-          $options: 'i',
-        },
-      })
-      .exec();
+    let query = model.find({
+      title: {
+        $regex: q
+          .split(/\s+/)
+          .map((w) => `(${w})`)
+          .join('|'),
+        $options: 'i',
+      },
+    });
+
+    if (populate) {
+      const refPaths = modelRefPaths(model);
+      for (const path of refPaths) query = query.populate(path);
+    }
+
+    const instances = await query.exec();
 
     res.json({ [model.collection.name]: instances });
   } catch (error) {
