@@ -113,6 +113,8 @@ async function updateWorkshop(search) {
   const accessToken = await info.store.get(info.keys.ACCESS_TOKEN);
   const user = await info.store.get(info.keys.USER);
 
+  if (!user) return console.log('You must be signed in to update resources.');
+
   try {
     const workshopId = await findResourceId('workshop', search);
     if (!workshopId) {

@@ -58,6 +58,8 @@ async function createKata(kataFolder = '.') {
     const accessToken = await info.store.get(info.keys.ACCESS_TOKEN);
     const user = await info.store.get(info.keys.USER);
 
+    if (!user) return console.log('You must be signed in to create Katas.');
+
     const formData = new FormData();
     formData.append('zip', fs.createReadStream(zipFile));
     formData.append('title', answers.title);
@@ -108,6 +110,8 @@ async function createWorkshop() {
   try {
     const accessToken = await info.store.get(info.keys.ACCESS_TOKEN);
     const user = await info.store.get(info.keys.USER);
+
+    if (!user) return console.log('You must be signed in to create Workshops.');
 
     await api.post(
       '/workshop',
