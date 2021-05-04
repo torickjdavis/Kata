@@ -5,9 +5,7 @@ import jwt from 'jsonwebtoken';
 import Kata from './Kata.js';
 import Workshop from './Workshop.js';
 
-const ObjectId = mongoose.Types.ObjectId;
-
-// TODO check versioning
+const { ObjectId, Mixed } = mongoose.Schema.Types;
 
 const SALT_ROUNDS = 10;
 const { JWT_SECRET } = process.env;
@@ -27,40 +25,46 @@ const UserSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
-  submissions: [
-    new mongoose.Schema(
-      {
-        kata: {
-          type: ObjectId,
-          ref: 'kata',
-          required: true,
-        },
-        kataVersion: String,
-        public: {
-          type: Boolean,
-          default: false,
-        },
-        files: [
-          {
-            name: String,
-            contents: String,
+  submissions: {
+    type: [
+      new mongoose.Schema(
+        {
+          kata: {
+            type: ObjectId,
+            ref: 'kata',
+            required: true,
           },
-        ],
-        tests: [
-          {
-            name: String,
-            passed: Boolean,
-            points: Number,
+          kataVersion: String,
+          public: {
+            type: Boolean,
+            default: false,
           },
-        ],
-        score: Number,
-        rawJestOutput: String,
-      },
-      {
-        timestamps: true,
-      }
-    ),
-  ],
+          success: Boolean,
+          score: Number,
+          maxPossibleScore: Number,
+          tests: {
+            counts: {
+              failed: Number,
+              passed: Number,
+              total: Number,
+            },
+            results: [
+              {
+                name: String,
+                passed: Boolean,
+                points: Number,
+              },
+            ],
+          },
+          rawJestOutput: Mixed,
+        },
+        {
+          timestamps: true,
+        }
+      ),
+    ],
+    select: false,
+  },
 });
 
 UserSchema.virtual('name.full').get(function () {
@@ -71,7 +75,7 @@ UserSchema.virtual('name.full').get(function () {
 
 UserSchema.pre('validate', async function () {
   if (this.password && this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
   }
 });
 
