@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const inquirer = require('inquirer');
 const api = require('../api');
 const { info, kata } = require('../stores');
@@ -9,7 +10,7 @@ module.exports.describe = 'access the system';
 
 module.exports.builder = (yargs) => {
   yargs.positional('action', {
-    choices: ['login', 'logout', 'register'],
+    choices: ['login', 'logout', 'register', 'whoami'],
   });
 };
 
@@ -18,6 +19,7 @@ module.exports.handler = async (argv) => {
   if (action === 'login') return login();
   if (action === 'logout') return logout();
   if (action === 'register') return register();
+  if (action === 'whoami') return whoAmI();
 };
 
 const loginQuestions = [
@@ -91,4 +93,12 @@ async function register() {
     if (error.response) return console.error('A user already exists with that email, please login.');
     console.error('An Unhandled Error Ocurred', error);
   }
+}
+
+async function whoAmI() {
+  const user = await info.store.get(info.keys.USER);
+  if (!user) console.log('You are not logged in.');
+
+  console.log(chalk.grey('Full Name'), user.name.full);
+  console.log(chalk.grey('Email'), user.email);
 }
