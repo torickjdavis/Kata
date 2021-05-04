@@ -1,5 +1,6 @@
 const api = require('./api');
 const inquirer = require('inquirer');
+const { exec: cpExec } = require('child_process');
 
 function fileTimestamp() {
   const now = new Date();
@@ -61,10 +62,20 @@ function handleAxiosError(error) {
   console.error(error.response?.data || 'No further details from the API.');
 }
 
+async function exec(command) {
+  return new Promise((resolve, reject) => {
+    cpExec(command, (error, stdout, stderr) => {
+      if (error || stderr) reject(error || stderr);
+      else resolve(stdout.trim());
+    });
+  });
+}
+
 module.exports = {
   fileTimestamp,
   capitalize,
   findResourceIds,
   findResourceId,
   handleAxiosError,
+  exec,
 };
