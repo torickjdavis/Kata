@@ -8,6 +8,7 @@ export async function connect() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
+      useFindAndModify: false,
     });
     console.debug('MongoDB Database Connected');
     return db;
