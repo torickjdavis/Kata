@@ -16,23 +16,37 @@
             </v-tabs>
           </v-card-title>
           <v-theme-provider dark>
-            <v-form>
+            <v-form v-model="valid" lazy-validation>
               <v-container class="pa-4">
                 <v-row v-if="!isLogin">
                   <v-col>
-                    <v-text-field label="First Name" filled></v-text-field>
-                    <v-text-field label="Last Name" filled></v-text-field>
+                    <v-text-field
+                      v-model="fname"
+                      label="First Name"
+                      filled
+                    ></v-text-field>
+                    <v-text-field
+                      v-model="lname"
+                      label="Last Name"
+                      filled
+                    ></v-text-field>
                   </v-col>
                 </v-row>
                 <v-text-field
                   label="UVU Email"
+                  v-model="email"
                   type="email"
                   filled
+                  :rules="[(v) => !!v || 'Email is required']"
+                  :error-messages="duplicateEmailError"
                   required
                 ></v-text-field>
                 <v-text-field
                   label="Password"
+                  v-model="password"
                   type="password"
+                  :rules="[(v) => !!v || 'Password is required']"
+                  :error-messages="invalidError"
                   filled
                   required
                 ></v-text-field>
@@ -49,12 +63,21 @@
 </template>
 
 <script>
+import * as auth from '@/services/AuthService';
+
 export default {
   name: 'Authentication',
   data() {
     return {
+      valid: true,
+      fname: '',
+      lname: '',
+      email: '',
+      password: '',
       tabIndex: null,
       tabs: ['Login', 'Register'],
+      duplicateEmailError: '',
+      invalidError: '',
     };
   },
   computed: {
@@ -65,10 +88,51 @@ export default {
       return this.tab === 'Login';
     },
   },
-  methods: {
-    submit() {
-      console.debug(`Submit form to ${this.tab}`);
+  watch: {
+    tabIndex(newVal, oldVal) {
+      console.log('ole val', oldVal);
+      console.log('new val', newVal);
     },
+    tab(val) {
+      this.duplicateEmailError = '';
+    },
+  },
+  methods: {
+    async submit() {
+      if (this.tabIndex) {
+        let user = {
+          name: {
+            first: this.fname,
+            last: this.lname,
+          },
+          email: this.email,
+          password: this.password,
+        };
+        try {
+          await auth.registerUser(user);
+        } catch (error) {
+          console.log(error);
+          this.duplicateEmailError =
+            'This email is already registered. Please Log In';
+        }
+        await auth.login(user);
+        this.$router.push('/');
+      } else {
+        let user = {
+          email: this.email,
+          password: this.password,
+        };
+        try {
+          await auth.login(user);
+          this.$router.push('/');
+        } catch (error) {
+          this.invalidError = 'Username or password is incorrect';
+        }
+      }
+    },
+  },
+  mounted() {
+    this.tabIndex = this.$route.params.register ? 1 : 0;
   },
 };
 </script>

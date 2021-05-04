@@ -9,10 +9,12 @@ const colors = {
   lightBlue: '#a8dadc', // powderBlue
   mediumBlue: '#457b9d', // mediumBlue
   darkBlue: '#1d3557', // prussianBlue
+  darkHoneydew: '#aadb9a',
 };
 
 export default new Vuetify({
   theme: {
+    options: { customProperties: true },
     dark: window.matchMedia('(prefers-color-scheme: dark)').matches, // default
     themes: {
       light: {
@@ -21,6 +23,7 @@ export default new Vuetify({
         accent: colors.imperialRed,
         info: colors.mediumBlue,
         background: colors.honeydew,
+        alert: colors.darkHoneydew,
       },
       dark: {
         primary: colors.darkBlue,
@@ -28,6 +31,7 @@ export default new Vuetify({
         accent: colors.imperialRed,
         background: colors.darkBlue,
         info: colors.mediumBlue,
+        alert: colors.darkHoneydew,
       },
     },
   },
