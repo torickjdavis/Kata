@@ -3,13 +3,21 @@ import multer from 'multer';
 
 import { rootRoute } from '../controllers/api.js';
 import resource from '../resource.js';
-import { authenticate, verify } from '../controllers/auth.js';
-import { getUserKatas } from '../controllers/katas.js';
+import { authenticate, validate } from '../controllers/auth.js';
+import {
+  downloadKata,
+  getUserKatas,
+  createSubmission,
+  getSubmission,
+  listSubmissions,
+} from '../controllers/katas.js';
 import search from '../controllers/search.js';
 
 import Kata from '../models/Kata.js';
 import Workshop from '../models/Workshop.js';
 import User from '../models/User.js';
+
+import { authorize } from '../middleware.js';
 
 const apiRouter = Router();
 
@@ -68,9 +76,26 @@ apiRouter.use(
     },
   })
 );
+
 apiRouter.post('/login', authenticate);
-apiRouter.post('/verify', verify);
+apiRouter.post('/validate', validate);
 apiRouter.get('/search/:resource', search);
 apiRouter.get('/userKatas/:id', getUserKatas);
+apiRouter.get('/download/:kataId', downloadKata);
+apiRouter.post(
+  '/submission/:userId',
+  authorize(authConfig.verifier)(true),
+  createSubmission
+);
+apiRouter.get(
+  '/submission/:userId/:submissionId',
+  authorize(authConfig.verifier)(true),
+  getSubmission
+);
+apiRouter.get(
+  '/submissions/:userId',
+  authorize(authConfig.verifier)(true),
+  listSubmissions
+);
 
 export default apiRouter;
