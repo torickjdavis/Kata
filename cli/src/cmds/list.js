@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const api = require('../api');
+const display = require('../display');
 
 module.exports.command = ['list <resource>', 'ls'];
 
@@ -7,7 +8,7 @@ module.exports.describe = 'list resource';
 
 const PAGE_DEFAULT = 1;
 const LIMIT_DEFAULT = 10;
-const MIN_ID_LENGTH = 6;
+const { MIN_ID_LENGTH } = display;
 
 module.exports.builder = (yargs) => {
   yargs
@@ -47,33 +48,6 @@ module.exports.builder = (yargs) => {
     });
 };
 
-function idFormat({ show, length = MIN_ID_LENGTH }) {
-  return (id) => (show ? id.substring(0, length) : '');
-}
-
-async function displayKata({ _id, title, creator, date }, idConfig) {
-  const id = idFormat(idConfig)(_id);
-  console.log(
-    `${id ? `${chalk.yellow(id)} ` : ''}${chalk.cyan(title)}`,
-    `(${creator.name.full || creator.email})`,
-    chalk.grey(`[${new Date(date).toLocaleDateString()}]`)
-  );
-}
-
-async function displayWorkshop({ _id, title, creator, date, katas }, idConfig) {
-  const id = idFormat(idConfig)(_id);
-  console.group(
-    `${id ? `${chalk.dim.yellow(id)} ` : ''}${chalk.bold.green(title)}`,
-    `(${creator.name.full || creator.email})`,
-    chalk.grey(`[${new Date(date).toLocaleDateString()}]`)
-  );
-  for (const kata of katas) {
-    const response = await api.get(`/kata/${kata._id}?populate`); // get detailed kata
-    await displayKata(response.data, idConfig);
-  }
-  console.groupEnd();
-}
-
 module.exports.handler = async (argv) => {
   const {
     resource,
@@ -96,12 +70,12 @@ module.exports.handler = async (argv) => {
   if (resource === 'kata') {
     // display katas
     for (const kata of results) {
-      await displayKata(kata, { show: idShow, length: idLength });
+      await display.kata(kata, { show: idShow, length: idLength });
     }
   } else if (resource === 'workshop') {
     // display workshops
     for (const workshop of results) {
-      await displayWorkshop(workshop, { show: idShow, length: idLength });
+      await display.workshop(workshop, { show: idShow, length: idLength });
     }
   } else console.log('Unexpected Resource Type', resource);
   console.groupEnd();
