@@ -1,9 +1,10 @@
 <template>
   <v-container>
-    <pre>{{ submission }}</pre>
+    <json-viewer expand-depth="Infinity" :value="submission" />
   </v-container>
 </template>
 <script>
+//TODO: add name, time, score and max possible to the top above the JSON
 import * as userService from '@/services/UserService';
 export default {
   data() {
@@ -20,7 +21,7 @@ export default {
         this.$store.state.token
       )
       .then((res, error) => {
-        this.submission = JSON.stringify(res.data, null, 2);
+        this.submission = res.data;
       });
   },
 };

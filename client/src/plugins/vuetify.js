@@ -1,7 +1,9 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify/lib/framework';
+import JsonViewer from 'vue-json-viewer';
 
 Vue.use(Vuetify);
+Vue.use(JsonViewer);
 
 const colors = {
   imperialRed: '#e63946',
