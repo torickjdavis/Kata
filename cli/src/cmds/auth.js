@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const api = require('../api');
-const { info } = require('../stores');
+const { info, kata } = require('../stores');
+const { handleAxiosError } = require('../utils');
 
 module.exports.command = 'auth <action>';
 
@@ -42,6 +43,7 @@ async function login() {
     await info.store.set(info.keys.USER, user);
     console.log('You are logged in.');
   } catch (error) {
+    if (error.isAxiosError) handleAxiosError(error);
     // prettier-ignore
     if (error.isTtyError) return console.error('Sorry, the prompt could not be rendered.');
     // prettier-ignore
@@ -66,7 +68,8 @@ const registerQuestions = [
 
 async function logout() {
   await info.store.clear();
-  console.log('You are logged out.');
+  await kata.store.clear();
+  console.log('You are logged out, and the local Kata data has been cleared.');
 }
 
 async function register() {
