@@ -12,7 +12,7 @@
       </router-link>
       <v-spacer></v-spacer>
       <v-btn
-        to="Explore"
+        to="/Explore"
         style="padding: 1%"
         class="primary text-button"
         exact
@@ -21,7 +21,7 @@
         Explore
       </v-btn>
       <v-btn
-        to="Workshops"
+        to="/Workshops"
         style="padding: 1%"
         class="primary text-button"
         exact
@@ -32,7 +32,7 @@
 
       <v-btn
         v-if="!$store.state.isLoggedIn"
-        to="Authentication"
+        to="/Authentication"
         class="primary text-button"
         style="padding: 1%"
         exact
@@ -49,13 +49,15 @@
             plain
             v-bind="attrs"
             v-on="on"
+            to="/Account"
+            exact
           >
             {{ name }}
           </v-btn>
         </template>
 
         <v-list class="primary">
-          <v-list-item to="Account">
+          <v-list-item to="/Account" exact>
             <v-list-item-title class="text-button"
               >Account Info</v-list-item-title
             >

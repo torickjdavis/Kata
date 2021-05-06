@@ -48,6 +48,7 @@ module.exports.handler = async (argv) => {
     if (!kataId) {
       return console.error(`No Kata found by searching for "${search}"`);
     }
+    await kataStore.store.set(path.resolve(kataPath), kataId);
   }
 
   const { public } = await inquirer.prompt([
@@ -75,8 +76,10 @@ module.exports.handler = async (argv) => {
       console.log('Running Tests in', kataPath);
       await exec(`jest --json --outputFile=${tmpJSONPath}`);
     } catch (error) {
+      const isJestPass = typeof error === 'string' && error.includes('PASS');
+      const isJestFail = !!error.message?.includes('FAIL');
       // jest will error if any tests fail, skip it's error
-      if (!error.message.includes('FAIL')) throw error;
+      if (!(isJestPass || isJestFail)) throw error;
     }
 
     const pointsRegex = /\[(-?\d+\.?\d*?)pts?\]/;
@@ -143,13 +146,13 @@ module.exports.handler = async (argv) => {
 
     console.log('Creating Submission');
 
-    await api.post(
+    const submitted = await api.post(
       `/submission/${user._id}`,
       {
+        ...humanOutput,
         kata: kataId,
         kataVersion: kata.version,
         public,
-        ...humanOutput,
         rawJestOutput,
       },
       {

@@ -37,7 +37,10 @@
                   v-model="email"
                   type="email"
                   filled
-                  :rules="[(v) => !!v || 'Email is required']"
+                  :rules="[
+                    (v) => !!v || 'Email is required',
+                    (v) => this.emailRegex.test(v) || 'Must be a Valid Email',
+                  ]"
                   :error-messages="duplicateEmailError"
                   required
                 ></v-text-field>
@@ -78,6 +81,7 @@ export default {
       tabs: ['Login', 'Register'],
       duplicateEmailError: '',
       invalidError: '',
+      emailRegex: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
     };
   },
   computed: {

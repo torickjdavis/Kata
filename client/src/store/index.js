@@ -11,7 +11,7 @@ export default new Vuex.Store({
     token: null,
     isLoggedIn: false,
     cliBase: 'kata-cli',
-    apiUrl: 'http://localhost:5000/api', //todo: use config file
+    apiUrl: process.env.VUE_APP_API_URL,
   },
   mutations: {
     authenticate(state) {

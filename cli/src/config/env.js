@@ -7,7 +7,7 @@ const dotenvExpand = require('dotenv-expand');
 
 const { NODE_ENV } = process.env;
 
-process.env.SRC = path.resolve('.', 'src'); // resolves to src folder
+process.env.SRC = path.resolve(__dirname, '..'); // resolves to src folder
 
 const env = path.resolve(process.env.SRC, '..', '.env');
 

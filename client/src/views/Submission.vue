@@ -1,6 +1,11 @@
 <template>
   <v-container>
-    <json-viewer expand-depth="Infinity" :value="submission" />
+    <h3>Kata: {{ submission.kata.title }}</h3>
+    <h4>Score: {{ submission.score }}/{{ submission.maxPossibleScore }}</h4>
+    <h4>Tests Passed: {{ submission.tests.counts.passed }}</h4>
+    <h4>Tests Failed: {{ submission.tests.counts.failed }}</h4>
+    <h4>Tests Total: {{ submission.tests.counts.total }}</h4>
+    <json-viewer :expand-depth="Infinity" :value="submission" />
   </v-container>
 </template>
 <script>
@@ -9,7 +14,12 @@ import * as userService from '@/services/UserService';
 export default {
   data() {
     return {
-      submission: '',
+      submission: {
+        tests: {
+          counts: {},
+        },
+        kata: {},
+      },
     };
   },
   beforeCreate() {

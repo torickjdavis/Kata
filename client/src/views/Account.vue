@@ -148,7 +148,9 @@ export default {
   name: 'Account',
   data() {
     return {
-      user: {},
+      user: {
+        name: {},
+      },
       tabs: ['Account Info', 'Submissions', 'Katas'],
       tabIndex: 0,
       submissionHeaders: [
@@ -244,10 +246,10 @@ export default {
       }
     },
   },
-  // computed:{
-  //   rules(){
-  //     if()
-  //   }
+  // computed: {
+  //   firstName() {
+  //     return this.user?.name?.first;
+  //   },
   // },
   created() {
     userService.getUserById(this.$store.state.userId).then((res) => {

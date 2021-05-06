@@ -10,6 +10,12 @@
       </p>
       <h4>How to get started</h4>
       <p>
+        Click the button below to download the CLI and then in that folder run
+        <code>npm link</code>
+      </p>
+      <v-btn class="primary" href="<FMI>" download> Download the CLI </v-btn>
+      <v-spacer></v-spacer>
+      <p class="my-4">
         Find kata you are looking for on the explore page or look at the curated
         workshops on the workshops page. Once you select the kata/workshop you
         want to do simply copy the given command line prompt and past it into

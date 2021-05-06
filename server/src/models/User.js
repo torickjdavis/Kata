@@ -86,9 +86,7 @@ UserSchema.static('verifyPassword', async function (email, plainTextPassword) {
 });
 
 UserSchema.methods.generateToken = async function () {
-  return jwt.sign(this.toJSON(), JWT_SECRET, {
-    expiresIn: '1d',
-  });
+  return jwt.sign(this.toJSON(), JWT_SECRET);
 };
 
 UserSchema.static('verifyToken', async function (token) {

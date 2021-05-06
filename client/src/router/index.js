@@ -11,6 +11,11 @@ Vue.use(VueRouter);
 
 const routes = [
   {
+    path: '/submission/:id/:submissionId',
+    name: 'Submission',
+    component: Submission,
+  },
+  {
     path: '/explore',
     name: 'Explore',
     component: Explore,
@@ -29,11 +34,6 @@ const routes = [
     path: '/account',
     name: 'Account',
     component: Account,
-  },
-  {
-    path: '/submission/:id/:submissionId',
-    name: 'Submission',
-    component: Submission,
   },
   {
     path: '/',

@@ -19,7 +19,7 @@ export async function downloadKata(req, res, next) {
 export async function createSubmission(req, res, next) {
   try {
     const { userId } = req.params;
-    const user = await User.findById(userId).exec();
+    const user = await User.findById(userId).select('+submissions').exec();
     if (!user.submissions) user.submissions = [];
     user.submissions.push(req.body);
     await user.save();
