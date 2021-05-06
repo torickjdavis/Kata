@@ -98,7 +98,7 @@ export default {
   },
   computed: {
     cliKataText() {
-      return `${this.$store.state.cliBase} read workshop "${this.selectedItem}"`;
+      return `${this.$store.state.cliBase} read kata "${this.selectedItem}"`;
     },
   },
   watch: {
