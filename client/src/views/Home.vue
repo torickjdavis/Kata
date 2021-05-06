@@ -13,7 +13,13 @@
         Click the button below to download the CLI and then in that folder run
         <code>npm link</code>
       </p>
-      <v-btn class="primary" href="<FMI>" download> Download the CLI </v-btn>
+      <v-btn
+        class="primary"
+        :href="process.env.VUE_APP_CLI_DOWNLOAD_URL"
+        download
+      >
+        Download the CLI
+      </v-btn>
       <v-spacer></v-spacer>
       <p class="my-4">
         Find kata you are looking for on the explore page or look at the curated
